@@ -100,7 +100,10 @@ int main()
     FollowCamera followCamera(playerCar);
     
     std::vector<StaticObject> objects{
-       { "Assets/Models/moscow/moscow.obj", { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f} }
+       { 
+            //"Assets/Models/moscow/moscow.obj", { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f}
+            "Assets/Models/BanK_Racetrack/Racetrack.obj", { -600, -20, 600 }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f} 
+        }
     };
 
     int frameCount = 0;
