@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <cmath>
 
 struct Ray
 {
@@ -86,4 +87,10 @@ bool IsNearMe2D(const glm::vec3& Subject, const glm::vec3& Me, float Range)
 {
     return (Subject.x > Me.x - Range && Subject.x < Me.x + Range) &&
         (Subject.z > Me.z - Range && Subject.z < Me.z + Range);
+}
+
+float GetYawFromForward(const glm::vec3& m_forward)
+{
+    glm::vec3 normalizedForward = glm::normalize(m_forward);
+    return std::atan2(normalizedForward.x, normalizedForward.z);
 }

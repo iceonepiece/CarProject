@@ -141,17 +141,13 @@ public:
 
     void CheckCollisions(const std::vector<StaticObject>& objects, float dt)
     {
-        Ray carRay;
-        carRay.position = m_position;
-        //carRay.direction = glm::normalize(m_forward); // Ensure direction is normalized
-        carRay.direction = glm::vec3(0, -1, 0);
+        Ray carRay{ m_position, glm::vec3(0, -1, 0) };
 
         Ray frontRay{ m_position, glm::vec3(0, -1, 0) };
         frontRay.position += frontWheelOffset * m_forward;
 
         Ray backRay{ m_position, glm::vec3(0, -1, 0) };
         backRay.position -= frontWheelOffset * m_forward;
-
 
         glm::vec3 right = glm::normalize(glm::cross(m_forward, glm::vec3{ 0.0f, 1.0f, 0.0f }));
 
@@ -163,7 +159,6 @@ public:
 
         for (const auto& object : objects)
         {
-            //auto transformedTriangles = object.GetTransformedTriangles();
             auto transformedTriangles = object.GetNearTriangles(m_position, 100.0f);
 
             glm::vec3 intersectionPoint;
@@ -182,7 +177,6 @@ public:
 
                 int count = 0;
                 float yTotal = 0.0f;
-                float yMax = frontIntersectionPoint.y;
 
                 if (frontHit)
                 {
@@ -195,9 +189,6 @@ public:
                 {
                     count++;
                     yTotal += backIntersectionPoint.y;
-
-                    if (backIntersectionPoint.y > yMax)
-                        yMax = backIntersectionPoint.y;
                 }
 
                 if (leftHit)
@@ -211,8 +202,6 @@ public:
                     count++;
                     yTotal += rightIntersectionPoint.y;
                 }
-
-
 
                 if (backHit && frontHit)
                 {
@@ -248,18 +237,6 @@ public:
                     m_rotation.z = 0.0f;
                 }
 
-                if (rightHit)
-                {
-                    count++;
-                    yTotal += rightIntersectionPoint.y;
-                }
-
-                if (leftHit)
-                {
-                    count++;
-                    yTotal += leftIntersectionPoint.y;
-                }
-
                 if (count > 0)
                 {
                     m_position.y = 0.52f + (yTotal / (float)count);
@@ -268,30 +245,6 @@ public:
 
         }
 
-        //Print(m_forward, "Fwd: ");
-        //Print(m_velocity, "Vel: ");
-    }
-
-    glm::vec3 CalculateNewForward(const glm::vec3& forward, const glm::vec3& normal)
-    {
-        // Project forward vector onto the plane defined by the normal
-        glm::vec3 newForward = forward - glm::dot(forward, normal) * normal;
-
-        // Normalize the resulting vector to ensure it's a unit vector
-        return glm::normalize(newForward);
-    }
-
-    void ResolveCollision(const glm::vec3& collisionPoint, const glm::vec3& collisionNormal)
-    {
-        // Project the car's velocity onto the collision normal to find the impact component
-        glm::vec3 velocityAlongNormal = glm::dot(m_velocity, collisionNormal) * collisionNormal;
-
-        // Reflect the velocity for a bounce effect or dampen it to slow down after the collision
-        m_velocity = glm::reflect(m_velocity, collisionNormal) * collisionDampingFactor;
-
-        // Move the car away from the collision point by the collision threshold
-        glm::vec3 correctionDirection = glm::normalize(m_position - collisionPoint);
-        m_position = collisionPoint + correctionDirection * (collisionThreshold + 0.01f);
     }
 
     float m_bodyRotationX = 0.0f;
@@ -300,35 +253,8 @@ public:
     float collisionResponseFactor = 0.5f; // Factor to adjust collision response strength
     float collisionDampingFactor = 0.3f; // Damping factor to reduce velocity after collision
 
-    glm::vec3 RotateAboutXAxis(float k)
-    {
-        // Step 1: Define the rotation matrix for rotating about the x-axis by k radians
-        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), k, glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate about x-axis
-
-        // Step 2: Apply the rotation to the forward vector
-        glm::vec3 newForward = glm::vec3(rotationMatrix * glm::vec4(m_forward, 1.0f));
-
-        // Step 3: Normalize the new forward vector (to ensure it's still a unit vector)
-        return glm::normalize(newForward);
-    }
-
-    float GetYawFromForward(const glm::vec3& m_forward)
-    {
-        // Ensure the forward vector is normalized
-        glm::vec3 normalizedForward = glm::normalize(m_forward);
-
-        // Yaw (rotation around the Y-axis) is the angle between the forward vector and the Z-axis
-        float yaw = atan2(normalizedForward.x, normalizedForward.z);
-
-        // Optionally convert yaw from radians to degrees if needed
-        // return glm::degrees(yaw);
-        return yaw; // Return yaw in radians
-    }
-
     void Render(Shader& shader)
     {
-        glm::vec3 rot = { m_rotation.x, GetYawFromForward(m_forward), m_rotation.z };
-
         glm::mat4 modelRotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1.0f, 0));
 
         glm::vec3 pos = m_position;
@@ -342,13 +268,11 @@ public:
         rotation = glm::rotate(rotation, m_rotation.z, glm::vec3(0, 0, 1));  // Roll (Z-axis)
 
         glm::mat4 model = glm::translate(glm::mat4(1.0f), pos)
-            //* glm::mat4(glm::quat(rot))
             * rotation
             * modelRotation
             * glm::scale(glm::mat4(1.0f), m_scale);
 
         shader.setMat4("model", model);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         m_model.Draw(shader);
 
         glm::vec3 frontWheelPosition = m_forward * frontWheelOffset;
@@ -387,13 +311,13 @@ private:
 
     Model m_wheelModel;
 
-    float m_accelerationFactor = 8.0f;
+    float m_accelerationFactor = 9.0f;
     float m_steerFactor = -30.0f;
     float m_steerLerpFactor = 0.06f;
-    float lateral_friction_factor = 3.5f;
+    float lateral_friction_factor = 4.5f;
     float backward_friction_factor = 0.22f;
 
-    float m_maxVelocity = 35.0f;
+    float m_maxVelocity = 45.0f;
 
     Model m_model;
     glm::vec3 m_velocity;

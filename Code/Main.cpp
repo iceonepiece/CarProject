@@ -27,18 +27,9 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-bool isTopView = false;
-
 
 void Print(const glm::vec3& v, std::string header = "")
 {
@@ -107,15 +98,10 @@ int main()
     //RacingTrack racingTrack;
     Car playerCar("Assets/Models/car/racer.obj", glm::vec3{ 0, 2, 0 }, glm::vec3{ 1.0f });
     FollowCamera followCamera(playerCar);
-
     
     std::vector<StaticObject> objects{
        { "Assets/Models/moscow/moscow.obj", { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f} }
     };
-    
-
-    // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     int frameCount = 0;
     float fpsTime = 0.0f;
@@ -147,9 +133,7 @@ int main()
         processInput(window);
 
         playerCar.Update(window, deltaTime);
-
         playerCar.CheckCollisions(objects, deltaTime);
-
         followCamera.Update(deltaTime);
 
         // render
@@ -160,38 +144,16 @@ int main()
         // don't forget to enable shader before setting uniforms
         ourShader.use();
 
-
         glm::vec3 lightPosition = playerCar.GetPosition();
         lightPosition.y += 6;
         lightPosition.z -= 2;
 
         ourShader.setVec3("lightPosition", lightPosition);
+        glm::mat4 projection = glm::perspective(glm::radians(followCamera.GetZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        glm::mat4 view = followCamera.GetViewMatrix();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
 
-        if (true)
-        {
-            glm::mat4 projection = glm::perspective(glm::radians(followCamera.GetZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-            glm::mat4 view = followCamera.GetViewMatrix();
-            ourShader.setMat4("projection", projection);
-            ourShader.setMat4("view", view);
-        }
-        else
-        {
-            glm::vec3 carPosition = playerCar.GetPosition();
-            carPosition.z += 2.0f;
-
-            glm::vec3 cameraPosition = carPosition;
-            cameraPosition.y += 35.0f;
-            cameraPosition.z -= 2.0f;
-
-            // view/projection transformations
-            glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-            glm::mat4 view = glm::lookAt(cameraPosition, carPosition, glm::vec3(0, 1, 0));
-            ourShader.setMat4("projection", projection);
-            ourShader.setMat4("view", view);
-        }
-
-        //racingTrack.Render(ourShader);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         playerCar.Render(ourShader);
 
         for (auto& obj : objects)
@@ -215,20 +177,6 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-
-
-    if (!isTopView)
-    {
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -244,38 +192,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS)
-    {
-        if (key == GLFW_KEY_SPACE)
-            isTopView = !isTopView;
-
-    }
 }
