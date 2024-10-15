@@ -250,8 +250,8 @@ void Skybox_Update(GLFWwindow* window, FollowCamera& camera, // settings
 
     // render
     // ------
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw scene as normal
     glm::mat4 model = glm::mat4(1.0f);
@@ -274,8 +274,8 @@ void Skybox_Update(GLFWwindow* window, FollowCamera& camera, // settings
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    //glfwSwapBuffers(window);
+    //glfwPollEvents();
 }
 
 
