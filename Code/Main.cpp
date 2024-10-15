@@ -16,6 +16,7 @@ using namespace irrklang;
 #include "Car.h"
 #include "FollowCamera.h"
 #include "StaticObject.h"
+#include "Skybox.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -92,6 +93,7 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader ourShader("Assets/Shaders/1.model_loading.vs", "Assets/Shaders/1.model_loading.fs");
+    Skybox_Init();
 
     // load models
     // -----------
@@ -143,6 +145,8 @@ int main()
         // ------
         glClearColor(0.007, 0.07, 0.138, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        Skybox_Update(window, followCamera , SCR_WIDTH, SCR_HEIGHT);
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
