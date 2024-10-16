@@ -115,7 +115,7 @@ public:
 
         m_frontWheelsRotation.y = angle;
 
-        m_position += m_velocity * dt;
+        m_position += m_velocity * dt *5.0f;
     }
 
     bool CheckRayCollisionWithObject(const Ray& ray, std::vector<Triangle>& triangles, glm::vec3& intersectionPoint)
@@ -141,20 +141,23 @@ public:
 
     void CheckCollisions(const std::vector<StaticObject>& objects, float dt)
     {
-        Ray carRay{ m_position, glm::vec3(0, -1, 0) };
+        glm::vec3 Raypos = m_position;
+        Raypos.y += 4;
 
-        Ray frontRay{ m_position, glm::vec3(0, -1, 0) };
+        Ray carRay{ Raypos, glm::vec3(0, -1, 0) };
+
+        Ray frontRay{ Raypos, glm::vec3(0, -1, 0) };
         frontRay.position += frontWheelOffset * m_forward;
 
-        Ray backRay{ m_position, glm::vec3(0, -1, 0) };
+        Ray backRay{ Raypos, glm::vec3(0, -1, 0) };
         backRay.position -= frontWheelOffset * m_forward;
 
         glm::vec3 right = glm::normalize(glm::cross(m_forward, glm::vec3{ 0.0f, 1.0f, 0.0f }));
 
-        Ray leftRay{ m_position, glm::vec3(0, -1, 0) };
+        Ray leftRay{ Raypos, glm::vec3(0, -1, 0) };
         leftRay.position -= sideWheelOffset * right;
 
-        Ray rightRay{ m_position, glm::vec3(0, -1, 0) };
+        Ray rightRay{ Raypos, glm::vec3(0, -1, 0) };
         rightRay.position += sideWheelOffset * right;
 
         for (const auto& object : objects)

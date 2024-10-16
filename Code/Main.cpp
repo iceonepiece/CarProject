@@ -156,7 +156,7 @@ int main()
         lightPosition.z -= 2;
 
         ourShader.setVec3("lightPosition", lightPosition);
-        glm::mat4 projection = glm::perspective(glm::radians(followCamera.GetZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(followCamera.GetZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.0f);
         glm::mat4 view = followCamera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);

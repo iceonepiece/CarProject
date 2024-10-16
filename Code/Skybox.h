@@ -81,7 +81,7 @@ unsigned int loadCubemap(vector<std::string> faces)
         unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else
@@ -221,12 +221,12 @@ void Skybox_Init()
 
     vector<std::string> faces
     {
-        ("Assets/Textures/skybox/right.jpg"),
-        ("Assets/Textures/skybox/left.jpg"),
-        ("Assets/Textures/skybox/top.jpg"),
-        ("Assets/Textures/skybox/bottom.jpg"),
-        ("Assets/Textures/skybox/front.jpg"),
-        ("Assets/Textures/skybox/back.jpg")
+        ("Assets/Textures/skybox/right.png"),
+        ("Assets/Textures/skybox/left.png"),
+        ("Assets/Textures/skybox/top.png"),
+        ("Assets/Textures/skybox/bottom.png"),
+        ("Assets/Textures/skybox/front.png"),
+        ("Assets/Textures/skybox/back.png")
     };
     cubemapTexture = loadCubemap(faces);
 
