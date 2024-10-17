@@ -145,6 +145,7 @@ xcopy /Y /E "$(ProjectDir)Assets" /I "$(OutDir)Assets"</Command>
     <ClCompile Include="ThirdParty\Include\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Audio.h" />
     <ClInclude Include="Code\Car.h" />
     <ClInclude Include="Code\FollowCamera.h" />
     <ClInclude Include="Code\Math.h" />

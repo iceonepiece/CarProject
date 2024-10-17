@@ -3,8 +3,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <irrklang/irrKlang.h>
-using namespace irrklang;
 
 //#include <learnopengl/filesystem.h>
 #include <learnopengl/shader_m.h>
@@ -16,6 +14,7 @@ using namespace irrklang;
 #include "Car.h"
 #include "FollowCamera.h"
 #include "StaticObject.h"
+#include "Audio.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -30,6 +29,7 @@ const unsigned int SCR_HEIGHT = 720;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+bool isFollowView = true;
 
 void Print(const glm::vec3& v, std::string header = "")
 {
@@ -75,13 +75,6 @@ int main()
         return -1;
     }
 
-    ISoundEngine* engine = createIrrKlangDevice();
-
-    if (!engine)
-        return 0; // error starting up the engine
-
-    //engine->play2D(FileSystem::getPath("resources/audio/engine-6000.mp3").c_str(), false);
-
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
     //stbi_set_flip_vertically_on_load(true);
 
@@ -96,11 +89,11 @@ int main()
     // load models
     // -----------
     //RacingTrack racingTrack;
-    Car playerCar("Assets/Models/car/racer.obj", glm::vec3{ 0, 2, 0 }, glm::vec3{ 1.0f });
+    Car playerCar("Assets/Models/car/racer_nowheels.obj", glm::vec3{ 0, 2, 0 }, glm::vec3{ 1.0f });
     FollowCamera followCamera(playerCar);
     
     std::vector<StaticObject> objects{
-       { "Assets/Models/moscow/moscow.obj", { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f} }
+        { "Assets/Models/moscow/moscow.obj", { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}, glm::vec3{80.0f} }
     };
 
     int frameCount = 0;
@@ -134,7 +127,9 @@ int main()
 
         playerCar.Update(window, deltaTime);
         playerCar.CheckCollisions(objects, deltaTime);
-        followCamera.Update(deltaTime);
+
+        followCamera.isFollowView = isFollowView;
+        followCamera.Update(window, deltaTime);
 
         // render
         // ------
@@ -202,4 +197,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE)
+    {
+        isFollowView = !isFollowView;
+    }
 }

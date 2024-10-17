@@ -23,7 +23,7 @@ public:
         , m_velocity{ 0 }
         , m_forward({ 0.0f, 0.0f, 1.0f })
         , m_rotation{ 0 }
-        , m_wheelModel("Assets/Models/lambo/lambo_Wheels.obj")
+        , m_wheelModel("Assets/Models/car/wheel.obj")
     {
     }
 
@@ -81,8 +81,13 @@ public:
         glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(steerAngle), glm::vec3(0, 1, 0));
         glm::vec3 newForward = rot * glm::vec4{ m_forward.x, m_forward.y, m_forward.z, 0.0f };
 
-        float amount = dt * glm::exp(m_steerLerpFactor * m_steerPowerCounter);
-        m_forward = glm::normalize(Lerp(m_forward, newForward, amount));
+        float amount = glm::exp(m_steerLerpFactor * m_steerPowerCounter);
+        m_forward = glm::normalize(Lerp(m_forward, newForward, amount * dt));
+
+        float newfrontWheelAngle = m_frontWheelAngle;
+        newfrontWheelAngle += glm::clamp(amount * glm::radians(steerAngle), -4.0f * dt, 4.0f * dt);
+        newfrontWheelAngle += glm::clamp(-m_frontWheelAngle, -2.0f * dt, 2.0f * dt);
+        m_frontWheelAngle = glm::clamp(newfrontWheelAngle, -0.68f, 0.68f);
 
         glm::vec3 acceleration = m_forward * (accelerationInput * m_accelerationFactor);
 
@@ -104,6 +109,9 @@ public:
         {
             m_velocity += acceleration * dt;
         }
+
+        if (glm::dot(m_forward, m_velocity) < 0.0f)
+            current_speed *= -1;
 
         m_frontWheelsRotation.x += current_speed * dt;
 
@@ -135,38 +143,29 @@ public:
         return minDistance < std::numeric_limits<float>::max();
     }
 
-    float frontWheelOffset = 0.45f;
-    float sideWheelOffset = 0.25f;
-
-
     void CheckCollisions(const std::vector<StaticObject>& objects, float dt)
     {
         Ray carRay{ m_position, glm::vec3(0, -1, 0) };
 
         Ray frontRay{ m_position, glm::vec3(0, -1, 0) };
-        frontRay.position += frontWheelOffset * m_forward;
+        frontRay.position += m_frontWheelOffset * m_forward;
 
         Ray backRay{ m_position, glm::vec3(0, -1, 0) };
-        backRay.position -= frontWheelOffset * m_forward;
+        backRay.position -= m_frontWheelOffset * m_forward;
 
         glm::vec3 right = glm::normalize(glm::cross(m_forward, glm::vec3{ 0.0f, 1.0f, 0.0f }));
 
         Ray leftRay{ m_position, glm::vec3(0, -1, 0) };
-        leftRay.position -= sideWheelOffset * right;
+        leftRay.position -= m_sideWheelOffset * right;
 
         Ray rightRay{ m_position, glm::vec3(0, -1, 0) };
-        rightRay.position += sideWheelOffset * right;
+        rightRay.position += m_sideWheelOffset * right;
 
         for (const auto& object : objects)
         {
             auto transformedTriangles = object.GetNearTriangles(m_position, 100.0f);
 
-            glm::vec3 intersectionPoint;
-
-            //if (CheckRayCollisionWithObject(carRay, transformedTriangles, intersectionPoint))
             {
-                //m_position.y = 1.0f + intersectionPoint.y;
-
                 glm::vec3 frontIntersectionPoint, backIntersectionPoint;
                 glm::vec3 leftIntersectionPoint, rightIntersectionPoint;
 
@@ -210,7 +209,7 @@ public:
                     float yDiff = backIntersectionPoint.y - frontIntersectionPoint.y;
 
                     glm::vec3 newRot = m_rotation;
-                    newRot.x = glm::atan(yDiff / (frontWheelOffset * 2));
+                    newRot.x = glm::atan(yDiff / (m_frontWheelOffset * 2));
                     glm::vec3 actualRot = Lerp(m_rotation, newRot, dt * 10.0f);
 
                     m_rotation.x = actualRot.x;
@@ -224,10 +223,10 @@ public:
                 {
                     float yDiff = leftIntersectionPoint.y - rightIntersectionPoint.y;
 
-                    m_rotation.z = glm::clamp(glm::atan(yDiff / (sideWheelOffset * 2)), -1.0f, 1.0f);
+                    m_rotation.z = glm::clamp(glm::atan(yDiff / (m_sideWheelOffset * 2)), -1.0f, 1.0f);
 
                     glm::vec3 newRot = m_rotation;
-                    newRot.z = glm::atan(yDiff / (frontWheelOffset * 2));
+                    newRot.z = glm::atan(yDiff / (m_frontWheelOffset * 2));
                     glm::vec3 actualRot = Lerp(m_rotation, newRot, dt * 10.0f);
 
                     m_rotation.z = actualRot.z;
@@ -246,12 +245,6 @@ public:
         }
 
     }
-
-    float m_bodyRotationX = 0.0f;
-
-    float collisionThreshold = 0.5f; // Threshold for collision detection
-    float collisionResponseFactor = 0.5f; // Factor to adjust collision response strength
-    float collisionDampingFactor = 0.3f; // Damping factor to reduce velocity after collision
 
     void Render(Shader& shader)
     {
@@ -275,33 +268,42 @@ public:
         shader.setMat4("model", model);
         m_model.Draw(shader);
 
-        glm::vec3 frontWheelPosition = m_forward * frontWheelOffset;
-        glm::vec3 backWheelPosition = m_position - m_forward * frontWheelOffset;
+        glm::vec3 frontWheelPosition = m_forward * m_frontWheelOffset;
+        glm::vec3 backWheelPosition = m_position - m_forward * m_frontWheelOffset;
 
-        glm::mat4 wheelModel = model * glm::translate(glm::mat4(1.0f), glm::vec3(-0.9, 0.3f, 0))
-            //* glm::mat4(glm::quat(m_frontWheelsRotation))
-            * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 1.0f, 0))
-            * glm::rotate(glm::mat4(1.0f), m_frontWheelsRotation.x, glm::vec3(1.0f, 0, 0))
-            * glm::scale(glm::mat4(1.0f), 0.95f * m_scale);
+        float wheelZOffset = 0.8f;
+        glm::vec3 rightWheelScale = m_scale;
+        rightWheelScale.z *= -1;
 
-        shader.setMat4("model", wheelModel);
-
-        m_wheelModel.Draw(shader);
-
-        /*
-
-        model = glm::translate(glm::mat4(1.0f), m_position)
-            //* glm::mat4(glm::quat(m_frontWheelsRotation))
-            * rotation
-            * rotationMatrix
-            * modelRotation
+        glm::mat4 frontLeftWheelModel = model * glm::translate(glm::mat4(1.0f), glm::vec3(-0.875, 0.3f, wheelZOffset))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelAngle, glm::vec3(0, 1, 0))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelsRotation.x, glm::vec3(0, 0, 1))
             * glm::scale(glm::mat4(1.0f), m_scale);
 
+        glm::mat4 frontRightWheelModel = model * glm::translate(glm::mat4(1.0f), glm::vec3(-0.875, 0.3f, -wheelZOffset))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelAngle, glm::vec3(0, 1, 0))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelsRotation.x, glm::vec3(0, 0, 1))
+            * glm::scale(glm::mat4(1.0f), rightWheelScale);
 
-        shader.setMat4("model", model);
-
+        shader.setMat4("model", frontLeftWheelModel);
         m_wheelModel.Draw(shader);
-        */
+
+        shader.setMat4("model", frontRightWheelModel);
+        m_wheelModel.Draw(shader);
+
+        glm::mat4 backLeftWheelModel = model * glm::translate(glm::mat4(1.0f), glm::vec3(1.475, 0.3f, wheelZOffset))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelsRotation.x, glm::vec3(0, 0, 1))
+            * glm::scale(glm::mat4(1.0f), m_scale);
+
+        glm::mat4 backrightWheelModel = model * glm::translate(glm::mat4(1.0f), glm::vec3(1.475, 0.3f, -wheelZOffset))
+            * glm::rotate(glm::mat4(1.0f), m_frontWheelsRotation.x, glm::vec3(0, 0, 1))
+            * glm::scale(glm::mat4(1.0f), rightWheelScale);
+
+        shader.setMat4("model", backLeftWheelModel);
+        m_wheelModel.Draw(shader);
+
+        shader.setMat4("model", backrightWheelModel);
+        m_wheelModel.Draw(shader);
     }
 
 private:
@@ -309,12 +311,15 @@ private:
 
     glm::vec3 m_frontWheelsRotation{ 0.0f };
 
+    float m_frontWheelOffset = 0.45f;
+    float m_sideWheelOffset = 0.25f;
+
     Model m_wheelModel;
 
     float m_accelerationFactor = 9.0f;
-    float m_steerFactor = -30.0f;
+    float m_steerFactor = -32.0f;
     float m_steerLerpFactor = 0.06f;
-    float lateral_friction_factor = 4.5f;
+    float lateral_friction_factor = 4.0f;
     float backward_friction_factor = 0.22f;
 
     float m_maxVelocity = 45.0f;
@@ -325,10 +330,17 @@ private:
     glm::vec3 m_rotation;
     glm::vec3 m_bodyRotation;
 
+    float m_bodyRotationX = 0.0f;
+    float collisionThreshold = 0.5f; // Threshold for collision detection
+    float collisionResponseFactor = 0.5f; // Factor to adjust collision response strength
+    float collisionDampingFactor = 0.3f; // Damping factor to reduce velocity after collision
+
     int m_steerPowerCounter = 0;
     int m_maxSteerPower = 20;
     float m_steerTimer = 0.0f;
     float m_steerUpgradeTime = 0.015f;
+
+    float m_frontWheelAngle = 0.0f;
 
     glm::vec3 m_scale;
     glm::vec3 m_position;

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+
 class FollowCamera
 {
 public:
-    bool isTopView = false;
+    bool isFollowView = true;
 
     FollowCamera(Car& car)
         : m_targetCar(car)
@@ -12,16 +14,13 @@ public:
     {
     }
 
-    void Update(float dt)
+    void Update(GLFWwindow* window, float dt)
     {
         glm::vec3 carDirection = m_targetCar.m_forward;
-        glm::vec3 k = glm::normalize(-carDirection);
+        glm::vec3 k = -glm::normalize(m_targetCar.m_forward);
 
-        glm::vec3 up = glm::vec3(0, 1, 0); // World up vector (y-axis)
-        glm::vec3 right = glm::normalize(glm::cross(up, carDirection));
-
-        if (isTopView)
-            k = right;
+        if (!isFollowView)
+            k = glm::normalize(glm::cross({ 0, 1, 0 }, carDirection));
 
         m_targetPosition = m_targetCar.m_position + (k * m_cameraDistance);
         m_targetPosition.y += m_cameraY;
@@ -44,7 +43,7 @@ public:
 private:
     float m_cameraSpeed = 15.0f;
     float m_delayTimer = 0.0f;
-    float m_cameraY = 1.75f;
+    float m_cameraY = 2.0f;
     float m_cameraDistance = 4.25f;
 
     float theta = 30.0f;

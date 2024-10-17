@@ -41,5 +41,8 @@
     <ClInclude Include="Code\FollowCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Audio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
