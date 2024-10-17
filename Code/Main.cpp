@@ -13,8 +13,8 @@ using namespace irrklang;
 #include <iostream>
 #include <vector>
 
-#include "Car.h"
-#include "FollowCamera.h"
+#include "Car2.h"
+#include "FollowCamera.h" 
 #include "StaticObject.h"
 #include "Skybox.h"
 
@@ -98,7 +98,7 @@ int main()
     // load models
     // -----------
     //RacingTrack racingTrack;
-    Car playerCar("Assets/Models/car/racer.obj", glm::vec3{ 0, 2, 0 }, glm::vec3{ 1.0f });
+    Car playerCar("Assets/Models/car/racer.obj", glm::vec3{ 192, 2, 51 }, glm::vec3{ 1.0f });
     FollowCamera followCamera(playerCar);
     
     std::vector<StaticObject> objects{
@@ -162,6 +162,15 @@ int main()
         ourShader.setMat4("view", view);
 
         playerCar.Render(ourShader);
+
+
+        for (CarGhost* Each : All_Ghost) {
+            Each->Update(window, deltaTime);
+            Each->Render(ourShader);
+        }
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+            All_Ghost.clear();
+        }
 
         for (auto& obj : objects)
             obj.Render(ourShader);
