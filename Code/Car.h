@@ -12,6 +12,7 @@
 
 #include "Math.h"
 #include "StaticObject.h"
+#include "Audio.h"
 
 class Car
 {
@@ -26,12 +27,6 @@ public:
         , m_wheelModel("Assets/Models/car/wheel.obj")
     {
     }
-
-
-    glm::vec3 hitPoint;
-    float minDistance;
-    float R_distance;
-
 
     glm::vec3 GetPosition() const
     {
@@ -128,7 +123,8 @@ public:
 
     bool CheckRayCollisionWithObject(const Ray& ray, std::vector<Triangle>& triangles, glm::vec3& intersectionPoint)
     {
-        minDistance = std::numeric_limits<float>::max();
+        glm::vec3 hitPoint;
+        float minDistance = std::numeric_limits<float>::max();
 
         // Loop through all triangles in the scene
         for (const Triangle& triangle : triangles) {
@@ -306,6 +302,46 @@ public:
         m_wheelModel.Draw(shader);
     }
 
+    float audioTime = 0;
+    irrklang::ISound* currentSound = nullptr;
+    float engineRound;
+
+    void AudioUpdate(Audio& audio, float dt, GLFWwindow* window)
+    {
+        float audioWait = 1 / (6 + engineRound * 0.2f);
+        audioWait = std::abs(audioWait);
+
+        if (audioTime > audioWait)
+        {
+            audioTime = 0;
+
+            if (currentSound = audio.PlaySound("CarEngine"))
+            {
+                currentSound->setPlaybackSpeed(engineRound * 0.065f + 1.35f); // Example: Increase pitch by 50%
+                currentSound->setVolume(0.5f);
+            }
+        }
+        else
+        {
+            audioTime += dt;
+        }
+
+        if (currentSound)
+        {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            {
+                currentSound->setVolume(1.0f);
+                engineRound += dt * 70.0f;
+            }
+            else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                engineRound += dt * 10.0f;
+            else
+                engineRound = Lerpf(engineRound, 0, dt * 0.55f);
+
+            engineRound = glm::clamp(engineRound, 0.0f, 45.0f);
+        }
+    }
+
 private:
     friend class FollowCamera;
 
@@ -316,13 +352,13 @@ private:
 
     Model m_wheelModel;
 
-    float m_accelerationFactor = 9.0f;
-    float m_steerFactor = -32.0f;
+    float m_accelerationFactor = 12.0f;
+    float m_steerFactor = -35.0f;
     float m_steerLerpFactor = 0.06f;
-    float lateral_friction_factor = 4.0f;
+    float lateral_friction_factor = 3.75f;
     float backward_friction_factor = 0.22f;
 
-    float m_maxVelocity = 45.0f;
+    float m_maxVelocity = 50.0f;
 
     Model m_model;
     glm::vec3 m_velocity;

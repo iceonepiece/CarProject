@@ -83,6 +83,11 @@ glm::vec3 Lerp(const glm::vec3& a, const glm::vec3& b, float t)
     return a + t * (b - a);
 }
 
+float Lerpf(float start, float end, float t)
+{
+    return start + t * (end - start);
+}
+
 bool IsNearMe2D(const glm::vec3& Subject, const glm::vec3& Me, float Range)
 {
     return (Subject.x > Me.x - Range && Subject.x < Me.x + Range) &&

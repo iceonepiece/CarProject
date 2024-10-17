@@ -75,6 +75,9 @@ int main()
         return -1;
     }
 
+    Audio audio;
+    audio.LoadSound("CarEngine", "Assets/Audio/Car.wav");
+
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
     //stbi_set_flip_vertically_on_load(true);
 
@@ -126,6 +129,8 @@ int main()
         processInput(window);
 
         playerCar.Update(window, deltaTime);
+        playerCar.AudioUpdate(audio, deltaTime, window);
+
         playerCar.CheckCollisions(objects, deltaTime);
 
         followCamera.isFollowView = isFollowView;
