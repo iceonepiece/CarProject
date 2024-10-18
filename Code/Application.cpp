@@ -1,8 +1,8 @@
 #include "Application.h"
 #include "Input.h"
 
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const static unsigned int SCR_WIDTH = 1024;
+const static unsigned int SCR_HEIGHT = 768;
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -79,6 +79,8 @@ Application::Application()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
+
+    glEnable(GL_DEPTH_TEST);
 
 }
 

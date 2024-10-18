@@ -12,9 +12,9 @@ public:
 
     FollowCamera(Car& car)
         : m_targetCar(car)
-        , m_position(glm::vec3(0, 0, 0))
-        , m_targetPosition(m_position)
     {
+        m_position = glm::vec3(0, 0, 0);
+        m_targetPosition = m_position;
     }
 
     void Update(float dt)
@@ -59,6 +59,5 @@ private:
     float theta = 30.0f;
     Car& m_targetCar;
     glm::vec3 m_targetPosition;
-    glm::vec3 m_position;
     float m_zoom = 60.0f;
 };

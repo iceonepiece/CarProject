@@ -9,4 +9,12 @@ public:
 	{
 		return glm::mat4(1.0f);
 	}
+
+	glm::vec3 GetPosition() const
+	{
+		return m_position;
+	}
+
+protected:
+	glm::vec3 m_position;
 };

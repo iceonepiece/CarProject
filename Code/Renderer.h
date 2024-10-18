@@ -2,21 +2,33 @@
 
 #include <learnopengl/shader_m.h>
 #include "Camera.h"
+#include "Light.h"
+
+#include <vector>
 
 class Renderer
 {
 public:
 	Renderer();
 
-	void BeginFrame(const Camera& camera) {}
+	void BeginFrame(Camera camera);
 
-private:
-	void InitializeDepthMap();
+	void DrawPlane(glm::mat4& model, Shader& shader);
+
+	Shader m_baseShader;
+	Shader m_depthShader;
 
 
 	unsigned int depthMapFBO;
 	unsigned int depthMap;
 
-	Shader m_baseShader;
-	Shader m_depthShader;
+
+private:
+	void InitializeDepthMap();
+
+	Camera m_camera;
+
+
+	std::vector<Light> m_lights;
+
 };

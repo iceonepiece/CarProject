@@ -26,6 +26,11 @@ public:
 
     glm::vec2 GetWindowSize();
 
+    GLFWwindow* GetWindow()
+    {
+        return window;
+    }
+
 private:
     static Application* s_instance;
 
