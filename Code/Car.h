@@ -13,6 +13,7 @@
 #include "Math.h"
 #include "StaticObject.h"
 #include "Audio.h"
+#include "Input.h"
 
 class Car
 {
@@ -33,23 +34,23 @@ public:
         return m_position;
     }
 
-    void Update(GLFWwindow* window, float dt)
+    void Update(float dt)
     {
         int accelerationInput = 0;
         int steerInput = 0;
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        if (Input::GetKey(GLFW_KEY_W))
             accelerationInput = 1;
 
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        if (Input::GetKey(GLFW_KEY_S))
             accelerationInput = -1;
 
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        if (Input::GetKey(GLFW_KEY_D))
         {
             steerInput = 1;
             m_steerTimer += dt;
         }
-        else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        else if (Input::GetKey(GLFW_KEY_A))
         {
             steerInput = -1;
             m_steerTimer += dt;
@@ -328,12 +329,12 @@ public:
 
         if (currentSound)
         {
-            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            if (Input::GetKey(GLFW_KEY_W))
             {
                 currentSound->setVolume(1.0f);
                 engineRound += dt * 70.0f;
             }
-            else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            else if (Input::GetKey(GLFW_KEY_S))
                 engineRound += dt * 10.0f;
             else
                 engineRound = Lerpf(engineRound, 0, dt * 0.55f);

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include "Camera.h"
+#include "Application.h"
+#include "Input.h"
 
-class FollowCamera
+class FollowCamera : public Camera
 {
 public:
     bool isFollowView = true;
@@ -14,8 +17,11 @@ public:
     {
     }
 
-    void Update(GLFWwindow* window, float dt)
+    void Update(float dt)
     {
+        if (Input::GetKeyDown(GLFW_KEY_SPACE))
+            isFollowView = !isFollowView;
+
         glm::vec3 carDirection = m_targetCar.m_forward;
         glm::vec3 k = -glm::normalize(m_targetCar.m_forward);
 
@@ -29,10 +35,14 @@ public:
         m_position = Lerp(m_position, m_targetPosition, dt * m_cameraSpeed);
     }
 
-    glm::mat4 GetViewMatrix() const
+    virtual glm::mat4 GetViewProjectionMatrix() const
     {
-        glm::vec3 target = m_targetCar.m_position;
-        return glm::lookAt(m_position, target, glm::vec3(0, 1, 0));
+        glm::mat4 view = glm::lookAt(m_position, m_targetCar.m_position, glm::vec3(0, 1, 0));
+
+        glm::vec2 windowSize = Application::Get().GetWindowSize();
+        glm::mat4 projection = glm::perspective(glm::radians(m_zoom), (float)windowSize.x / (float)windowSize.y, 0.1f, 1000.0f);
+
+        return projection * view;
     }
 
     float GetZoom() const
