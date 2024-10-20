@@ -5,6 +5,8 @@
 class Camera
 {
 public:
+	virtual ~Camera() = default;
+
 	virtual glm::mat4 GetViewProjectionMatrix() const
 	{
 		return glm::mat4(1.0f);

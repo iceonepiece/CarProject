@@ -142,6 +142,7 @@ xcopy /Y /E "$(ProjectDir)Assets" /I "$(OutDir)Assets"</Command>
   <ItemGroup>
     <ClCompile Include="Code\Application.cpp" />
     <ClCompile Include="Code\Main.cpp" />
+    <ClCompile Include="Code\Renderer.cpp" />
     <ClCompile Include="ThirdParty\Include\glad\glad.c" />
     <ClCompile Include="ThirdParty\Include\stb_image.cpp" />
   </ItemGroup>
