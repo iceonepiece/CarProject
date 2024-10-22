@@ -119,7 +119,7 @@ public:
 
         m_frontWheelsRotation.y = angle;
 
-        m_position += m_velocity * dt * 5.0f;
+        m_position += m_velocity * dt * 10.0f;
     }
 
     bool CheckRayCollisionWithObject(const Ray& ray, std::vector<Triangle>& triangles, glm::vec3& intersectionPoint)
