@@ -1,27 +1,32 @@
 #pragma once
 
-class FollowCamera
+#include <GLFW/glfw3.h>
+#include "Camera.h"
+#include "Application.h"
+#include "Input.h"
+
+class FollowCamera : public Camera
 {
 public:
-    bool isTopView = false;
+    bool isFollowView = true;
 
     FollowCamera(Car& car)
         : m_targetCar(car)
-        , m_position(glm::vec3(0, 0, 0))
-        , m_targetPosition(m_position)
     {
+        m_position = glm::vec3(0, 0, 0);
+        m_targetPosition = m_position;
     }
 
     void Update(float dt)
     {
+        if (Input::GetKeyDown(GLFW_KEY_SPACE))
+            isFollowView = !isFollowView;
+
         glm::vec3 carDirection = m_targetCar.m_forward;
-        glm::vec3 k = glm::normalize(-carDirection);
+        glm::vec3 k = -glm::normalize(m_targetCar.m_forward);
 
-        glm::vec3 up = glm::vec3(0, 1, 0); // World up vector (y-axis)
-        glm::vec3 right = glm::normalize(glm::cross(up, carDirection));
-
-        if (isTopView)
-            k = right;
+        if (!isFollowView)
+            k = glm::normalize(glm::cross({ 0, 1, 0 }, carDirection));
 
         m_targetPosition = m_targetCar.m_position + (k * m_cameraDistance);
         m_targetPosition.y += m_cameraY;
@@ -30,10 +35,14 @@ public:
         m_position = Lerp(m_position, m_targetPosition, dt * m_cameraSpeed);
     }
 
-    glm::mat4 GetViewMatrix() const
+    virtual glm::mat4 GetViewProjectionMatrix() const
     {
-        glm::vec3 target = m_targetCar.m_position;
-        return glm::lookAt(m_position, target, glm::vec3(0, 1, 0));
+        glm::mat4 view = glm::lookAt(m_position, m_targetCar.m_position, glm::vec3(0, 1, 0));
+
+        glm::vec2 windowSize = Application::Get().GetWindowSize();
+        glm::mat4 projection = glm::perspective(glm::radians(m_zoom), (float)windowSize.x / (float)windowSize.y, 0.1f, 1000.0f);
+
+        return projection * view;
     }
 
     float GetZoom() const
@@ -44,12 +53,11 @@ public:
 private:
     float m_cameraSpeed = 15.0f;
     float m_delayTimer = 0.0f;
-    float m_cameraY = 1.75f;
+    float m_cameraY = 2.0f;
     float m_cameraDistance = 4.25f;
 
     float theta = 30.0f;
     Car& m_targetCar;
     glm::vec3 m_targetPosition;
-    glm::vec3 m_position;
     float m_zoom = 60.0f;
 };
