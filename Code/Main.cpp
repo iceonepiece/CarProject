@@ -21,16 +21,6 @@ unsigned int loadTexture(const char* path);
 void renderScene(Renderer& renderer, const Shader& shader);
 void renderQuad();
 
-// settings
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
-
-// camera
-//Camera camera(glm::vec3(0.0f, 2.0f, 3.0f));
-float lastX = (float)SCR_WIDTH / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
-bool firstMouse = true;
-
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
