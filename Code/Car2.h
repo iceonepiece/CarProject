@@ -1,5 +1,5 @@
 #pragma once
-#include "Car.h"
+#include "Car1.h"
 
 
 
@@ -18,7 +18,6 @@ public:
         , m_wheelModel("Assets/Models/lambo/lambo_Wheels.obj")
     {
     }
-
 
     glm::vec3 hitPoint;
     float minDistance;
@@ -146,14 +145,14 @@ public:
     std::vector<Keyframe> keyframes; // Vector of keyframes
     float timeAccumulator = 0.0f;
     float timeKey = 0.0f;
-    void PlaceKeyframes(float Deltatime) {
+    void PlaceKeyframes(float Deltatime) { 
         timeAccumulator += Deltatime;
         timeKey += Deltatime;
 
         // Check if we have reached the 0.2-second interval
         if (timeAccumulator > KeyframeScale) {
             // Create a keyframe with the current position and scale
-            Keyframe newKeyframe(timeKey, m_position, m_rotation, m_scale);
+            Keyframe newKeyframe(timeKey, m_position, m_rotation, m_scale,m_forward);
 
             // Add the keyframe to the vector
             keyframes.push_back(newKeyframe); 
