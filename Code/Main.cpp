@@ -10,11 +10,13 @@
 #include <learnopengl/model.h>
 
 #include "Application.h"
-#include "Car.h"
+#include "Car2.h"
 #include "FollowCamera.h"
 #include "Renderer.h"
 
 #include <iostream>
+
+
 
 void processInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
@@ -85,7 +87,7 @@ int main()
 
         app.ProcessInput();
 
-        playerCar.Update(deltaTime);
+        playerCar.Update(app.GetWindow(),deltaTime);
         //playerCar.AudioUpdate(audio, deltaTime, window);
         playerCar.CheckCollisions(objects, deltaTime);
         followCamera.Update(deltaTime);
@@ -98,6 +100,9 @@ int main()
 
         renderScene(renderer, renderer.m_depthShader);
         playerCar.Render(renderer.m_depthShader);
+        for (CarGhost* Each : All_Ghost) {///////////////
+            Each->Render(renderer.m_depthShader);
+        }
 
         for (auto& obj : objects)
             obj.Render(renderer.m_baseShader);
@@ -110,6 +115,20 @@ int main()
 
         renderScene(renderer, renderer.m_baseShader);
         playerCar.Render(renderer.m_baseShader);
+        for (CarGhost* Each : All_Ghost) {///////////////
+            Each->Render(renderer.m_baseShader);
+        }
+
+
+        if (glfwGetKey(app.GetWindow(), GLFW_KEY_C) == GLFW_PRESS) {
+            All_Ghost.clear();
+        }
+        for (CarGhost* Each : All_Ghost) {
+            Each->Update(app.GetWindow(), deltaTime);
+        }
+
+
+
 
         for (auto& obj : objects)
             obj.Render(renderer.m_baseShader);
