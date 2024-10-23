@@ -42,6 +42,8 @@ unsigned int planeVAO;
 
 int main()
 {
+
+
     Application app;
     Renderer renderer;
 
@@ -118,8 +120,6 @@ int main()
         for (CarGhost* Each : All_Ghost) {///////////////
             Each->Render(renderer.m_baseShader);
         }
-
-
         if (glfwGetKey(app.GetWindow(), GLFW_KEY_C) == GLFW_PRESS) {
             All_Ghost.clear();
         }
@@ -143,7 +143,7 @@ int main()
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(app.GetWindow());
-        glfwPollEvents();
+        BanK_SystemKeys::Update(app.GetWindow());
     }
 
     glfwTerminate();

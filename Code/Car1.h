@@ -12,8 +12,160 @@
 
 #include "Math.h"
 #include "StaticObject.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+//   This is temporary for test
+///////////////////////////////////////////////////////////////////////
+class InputEvent;
+vector <InputEvent*> SystemInputList;
+class InputEvent {
+
+public:
+    InputEvent(int GLFW_Key)
+        :My_GLFW_Key(GLFW_Key) {
+        SystemInputList.reserve(500);
+        SystemInputList.push_back(this);
+    }
+    int My_GLFW_Key;
+    bool Pressed = false;
+    bool OnPressed = false;
+    bool OnReleased = false;
+
+    virtual void UpdateState(GLFWwindow* window) = 0;
+    void UpdateEvent(int glfGet) {
+        if (glfGet == GLFW_PRESS) {
+
+            if (Pressed) {
+                OnPressed = false;
+            }
+            else {
+                OnPressed = true;
+            }
+            Pressed = true;
+            OnReleased = false;
+        }
+        else {
+
+            if (!Pressed) {
+                OnReleased = false;
+            }
+            else {
+                OnReleased = true;
+            }
+            Pressed = false;
+            OnPressed = false;
+        }
+    }
+};
+
+
+namespace BanK_SystemKeys {
+
+    class KeyEvent : public InputEvent {
+
+    public:
+        KeyEvent(int GLFW_Key)
+            :InputEvent(GLFW_Key) {}
+
+        void UpdateState(GLFWwindow* window) {
+            UpdateEvent(glfwGetKey(window, My_GLFW_Key));
+        }
+    };
+
+    KeyEvent A = KeyEvent(GLFW_KEY_A);
+    KeyEvent B = KeyEvent(GLFW_KEY_B);
+    KeyEvent C = KeyEvent(GLFW_KEY_C);
+    KeyEvent D = KeyEvent(GLFW_KEY_D);
+    KeyEvent E = KeyEvent(GLFW_KEY_E);
+    KeyEvent F = KeyEvent(GLFW_KEY_F);
+    KeyEvent G = KeyEvent(GLFW_KEY_G);
+    KeyEvent H = KeyEvent(GLFW_KEY_H);
+    KeyEvent I = KeyEvent(GLFW_KEY_I);
+    KeyEvent J = KeyEvent(GLFW_KEY_J);
+    KeyEvent K = KeyEvent(GLFW_KEY_K);
+    KeyEvent L = KeyEvent(GLFW_KEY_L);
+    KeyEvent M = KeyEvent(GLFW_KEY_M);
+    KeyEvent N = KeyEvent(GLFW_KEY_N);
+    KeyEvent O = KeyEvent(GLFW_KEY_O);
+    KeyEvent P = KeyEvent(GLFW_KEY_P);
+    KeyEvent Q = KeyEvent(GLFW_KEY_Q);
+    KeyEvent R = KeyEvent(GLFW_KEY_R);
+    KeyEvent S = KeyEvent(GLFW_KEY_S);
+    KeyEvent T = KeyEvent(GLFW_KEY_T);
+    KeyEvent U = KeyEvent(GLFW_KEY_U);
+    KeyEvent V = KeyEvent(GLFW_KEY_V);
+    KeyEvent W = KeyEvent(GLFW_KEY_W);
+    KeyEvent X = KeyEvent(GLFW_KEY_X);
+    KeyEvent Y = KeyEvent(GLFW_KEY_Y);
+    KeyEvent Z = KeyEvent(GLFW_KEY_Z);
+
+    KeyEvent Escape = KeyEvent(GLFW_KEY_ESCAPE);
+    KeyEvent Tab = KeyEvent(GLFW_KEY_TAB);
+    KeyEvent Space = KeyEvent(GLFW_KEY_SPACE);
+    KeyEvent Backspace = KeyEvent(GLFW_KEY_BACKSPACE);
+    KeyEvent Enter = KeyEvent(GLFW_KEY_ENTER);
+    KeyEvent LeftShift = KeyEvent(GLFW_KEY_LEFT_SHIFT);
+    KeyEvent RightShift = KeyEvent(GLFW_KEY_RIGHT_SHIFT);
+    KeyEvent LeftCtrl = KeyEvent(GLFW_KEY_LEFT_CONTROL);
+    KeyEvent RightCtrl = KeyEvent(GLFW_KEY_RIGHT_CONTROL);
+    KeyEvent LFT_Alt = KeyEvent(GLFW_KEY_LEFT_ALT);
+    KeyEvent RHT_Alt = KeyEvent(GLFW_KEY_RIGHT_ALT);
+    KeyEvent CapsLock = KeyEvent(GLFW_KEY_CAPS_LOCK);
+    KeyEvent F1 = KeyEvent(GLFW_KEY_F1);
+    KeyEvent F2 = KeyEvent(GLFW_KEY_F2);
+    KeyEvent F3 = KeyEvent(GLFW_KEY_F3);
+    KeyEvent F4 = KeyEvent(GLFW_KEY_F4);
+    KeyEvent F5 = KeyEvent(GLFW_KEY_F5);
+    KeyEvent F6 = KeyEvent(GLFW_KEY_F6);
+    KeyEvent F7 = KeyEvent(GLFW_KEY_F7);
+    KeyEvent F8 = KeyEvent(GLFW_KEY_F8);
+    KeyEvent F9 = KeyEvent(GLFW_KEY_F9);
+    KeyEvent F10 = KeyEvent(GLFW_KEY_F10);
+    KeyEvent F11 = KeyEvent(GLFW_KEY_F11);
+    KeyEvent F12 = KeyEvent(GLFW_KEY_F12);
+    KeyEvent LFT_BRACKET = KeyEvent(GLFW_KEY_LEFT_BRACKET);
+    KeyEvent RHT_BRACKET = KeyEvent(GLFW_KEY_RIGHT_BRACKET);
+    KeyEvent BACKSLASH = KeyEvent(GLFW_KEY_BACKSLASH);
+    KeyEvent SLASH = KeyEvent(GLFW_KEY_SLASH);
+    KeyEvent Equal = KeyEvent(GLFW_KEY_EQUAL);
+    KeyEvent Minus = KeyEvent(GLFW_KEY_MINUS);
+
+
+    void Update(GLFWwindow* window) {
+
+        glfwPollEvents();
+
+        for (InputEvent* pInst : SystemInputList) {
+            pInst->UpdateState(window);
+        }
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 const glm::mat4 mat4one = glm::mat4(1.0f);
 float KeyframeScale = 0.1;
+
 
 struct Keyframe {
     float time;       
@@ -96,7 +248,7 @@ glm::vec3 LerpVec3(glm::vec3 start, glm::vec3 end, float t) {
     return glm::vec3(Lerp(start.x, end.x, t),
         Lerp(start.y, end.y, t),
         Lerp(start.z, end.z, t));
-}
+} 
 
 
 
@@ -108,7 +260,7 @@ void CarGhost::Update(GLFWwindow* window, float dt) {
 
 
     // Handle input for restart and play/pause
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+    if (BanK_SystemKeys::R.OnPressed) {
         currentTime = 0.0f;          // Reset the timer
         currentKeyframeIndex = 0;    // Start at the first keyframe
         isPlaying = true;
@@ -128,15 +280,17 @@ void CarGhost::Update(GLFWwindow* window, float dt) {
     Keyframe currentKeyframe = keyframes[currentKeyframeIndex];
     Keyframe nextKeyframe = keyframes[currentKeyframeIndex + 1];
      
-    m_position = LerpVec3(m_position, TargetPos, dt * 4);
+    float LerpSpeed = dt * 4;
+    m_position = LerpVec3(m_position, TargetPos, LerpSpeed);
     m_rotation = TargetRot;
     m_forward = TargetFWD;
 
     if (currentTime > KeyframeScale) {
         TargetPos = nextKeyframe.position;
         TargetRot = nextKeyframe.rotation;
+        TargetFWD = nextKeyframe.forward;
         m_scale = nextKeyframe.scale;
-        m_forward = nextKeyframe.forward;
+
         currentKeyframeIndex++;
         currentTime = 0;
     }

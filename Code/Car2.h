@@ -32,13 +32,15 @@ public:
     void Update(GLFWwindow* window, float dt)
     {
         PlaceKeyframes(dt); 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        if (BanK_SystemKeys::E.OnPressed) {
+            All_Ghost.clear();
+
+
             if (!keyframes.empty()) {
                 CarGhost* NewGhost = new CarGhost(m_model, keyframes);
-                keyframes.clear(); // Clear the keyframes vector
+                keyframes.clear(); 
             }
         }
-
 
 
 
