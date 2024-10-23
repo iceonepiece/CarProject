@@ -164,7 +164,7 @@ namespace BanK_SystemKeys {
 
 
 const glm::mat4 mat4one = glm::mat4(1.0f);
-float KeyframeScale = 0.1;
+float KeyframeScale = 0.08;
 
 
 struct Keyframe {
@@ -283,7 +283,7 @@ void CarGhost::Update(GLFWwindow* window, float dt) {
     float LerpSpeed = dt * 4;
     m_position = LerpVec3(m_position, TargetPos, LerpSpeed);
     m_rotation = TargetRot;
-    m_forward = TargetFWD;
+    m_forward = LerpVec3(m_forward, TargetFWD, LerpSpeed);
 
     if (currentTime > KeyframeScale) {
         TargetPos = nextKeyframe.position;
