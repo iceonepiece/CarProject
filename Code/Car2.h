@@ -1,5 +1,5 @@
 #pragma once
-#include "Car1.h"
+#include "CarGhost.h"
 
 
 
@@ -16,6 +16,7 @@ public:
         , m_forward({ 0.0f, 0.0f, 1.0f })
         , m_rotation{ 0 }
         , m_wheelModel("Assets/Models/lambo/lambo_Wheels.obj")
+        , ohMyGhost(m_model, keyframes)
     {
     }
 
@@ -29,15 +30,34 @@ public:
         return m_position;
     }
 
+    bool m_recording = false;
+
+    CarGhost ohMyGhost;
+
     void Update(GLFWwindow* window, float dt)
     {
-        PlaceKeyframes(dt); 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        if (m_recording)
+            PlaceKeyframes(dt); 
+
+        //if (glfwGetKey(window, GLFW_KEY_E) == 
+        // GLFW_PRESS) {
+        if (Input::GetKeyDown(GLFW_KEY_E)) {
+            if (!keyframes.empty()) {
+                std::cout << "keyframes: " << keyframes.size() << std::endl;
+                ohMyGhost = CarGhost(m_model, keyframes);
+                keyframes.clear();
+
+            }
+            /*
             if (!keyframes.empty()) {
                 CarGhost* NewGhost = new CarGhost(m_model, keyframes);
                 keyframes.clear(); // Clear the keyframes vector
             }
+            */
         }
+
+        if (Input::GetKeyDown(GLFW_KEY_K))
+            m_recording = !m_recording;
 
 
 
@@ -118,7 +138,9 @@ public:
 
         m_frontWheelsRotation.y = angle;
 
-        m_position += m_velocity * dt * 10.0f;
+        m_position += m_velocity * dt;
+
+        ohMyGhost.Update(window, dt);
     }
 
     bool CheckRayCollisionWithObject(const Ray& ray, std::vector<Triangle>& triangles, glm::vec3& intersectionPoint)
@@ -329,6 +351,8 @@ public:
 
         m_wheelModel.Draw(shader);
         */
+
+        ohMyGhost.Render(shader);
     }
 
 private:
@@ -338,13 +362,13 @@ private:
 
     Model m_wheelModel;
 
-    float m_accelerationFactor = 9.0f;
+    float m_accelerationFactor = 12.0f;
     float m_steerFactor = -30.0f;
     float m_steerLerpFactor = 0.06f;
     float lateral_friction_factor = 4.5f;
     float backward_friction_factor = 0.22f;
 
-    float m_maxVelocity = 45.0f;
+    float m_maxVelocity = 70.0f;
 
     Model m_model;
     glm::vec3 m_velocity;

@@ -10,7 +10,8 @@
 #include <learnopengl/model.h>
 
 #include "Application.h"
-#include "Car2.h"
+#include "Car.h"
+
 #include "FollowCamera.h"
 #include "Renderer.h"
 
@@ -70,7 +71,6 @@ int main()
     glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
     glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-
     // render loop
     // -----------
     while (!app.WindowShouldClose())
@@ -87,9 +87,25 @@ int main()
 
         app.ProcessInput();
 
-        playerCar.Update(app.GetWindow(),deltaTime);
+        playerCar.Update(deltaTime);
         //playerCar.AudioUpdate(audio, deltaTime, window);
         playerCar.CheckCollisions(objects, deltaTime);
+
+
+        /*
+        if (glfwGetKey(app.GetWindow(), GLFW_KEY_C) == GLFW_PRESS) {
+            All_Ghost.clear();
+        }
+        */
+
+        /*
+        for (CarGhost* Each : All_Ghost) {
+            Each->Update(app.GetWindow(), deltaTime);
+        }
+        */
+
+
+
         followCamera.Update(deltaTime);
 
         renderer.BeginFrame(followCamera);
@@ -100,12 +116,13 @@ int main()
 
         renderScene(renderer, renderer.m_depthShader);
         playerCar.Render(renderer.m_depthShader);
-        for (CarGhost* Each : All_Ghost) {///////////////
-            Each->Render(renderer.m_depthShader);
-        }
+
+        //for (CarGhost* Each : All_Ghost) {///////////////
+          //  Each->Render(renderer.m_depthShader);
+        //}
 
         for (auto& obj : objects)
-            obj.Render(renderer.m_baseShader);
+            obj.Render(renderer.m_depthShader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -115,20 +132,13 @@ int main()
 
         renderScene(renderer, renderer.m_baseShader);
         playerCar.Render(renderer.m_baseShader);
+
+
+        /*
         for (CarGhost* Each : All_Ghost) {///////////////
             Each->Render(renderer.m_baseShader);
         }
-
-
-        if (glfwGetKey(app.GetWindow(), GLFW_KEY_C) == GLFW_PRESS) {
-            All_Ghost.clear();
-        }
-        for (CarGhost* Each : All_Ghost) {
-            Each->Update(app.GetWindow(), deltaTime);
-        }
-
-
-
+        */
 
         for (auto& obj : objects)
             obj.Render(renderer.m_baseShader);
@@ -143,7 +153,7 @@ int main()
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(app.GetWindow());
-        glfwPollEvents();
+        //glfwPollEvents();
     }
 
     glfwTerminate();

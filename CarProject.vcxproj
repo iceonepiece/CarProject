@@ -150,6 +150,7 @@ xcopy /Y /E "$(ProjectDir)Assets" /I "$(OutDir)Assets"</Command>
     <ClInclude Include="Code\Audio.h" />
     <ClInclude Include="Code\Camera.h" />
     <ClInclude Include="Code\Car.h" />
+    <ClInclude Include="Code\CarGhost.h" />
     <ClInclude Include="Code\FollowCamera.h" />
     <ClInclude Include="Code\Input.h" />
     <ClInclude Include="Code\Light.h" />
