@@ -14,4 +14,5 @@ void main()
 	vec4 clipPos = projection * rotView * vec4(WorldPos, 1.0);
 
 	gl_Position = clipPos.xyww;
+	gl_Position.z = gl_Position.w -0.00001;
 }

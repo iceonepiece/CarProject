@@ -1,8 +1,8 @@
 #include "Application.h"
 #include "Input.h"
 
-const static unsigned int SCR_WIDTH = 1024;
-const static unsigned int SCR_HEIGHT = 768;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 800;
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------

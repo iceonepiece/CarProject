@@ -13,6 +13,7 @@ GameObj* CarOBJ;
 B_Car* CarBehav;
 glm::vec3 Cam_CamPos;
 glm::vec3 Cam_CarPos;
+glm::vec3 LightDirection = glm::vec3(-0.221106, - 1.79843, - 2.10234);
 
 
 unsigned int sphereVAO = 0;
@@ -119,8 +120,8 @@ void renderScene(Renderer& renderer, const Shader& shader);
 void renderQuad();
 
 // settings
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera
 //Camera camera(glm::vec3(0.0f, 2.0f, 3.0f));
@@ -257,15 +258,15 @@ int main()
     CarBehav = CarOBJ->AddComponent(new B_Car);
     //CarOBJ->Transform.wPosition = glm::vec3(3.4, -9, 76);
     CarOBJ->Transform.wPosition = glm::vec3(0, 0, 0);
-    CarOBJ->Transform.wRotation = glm::vec3(0, 0, 0);
+    CarOBJ->Transform.wRotation = glm::vec3(0, -45, 0);  
     CarOBJ->Transform.wScale = glm::vec3(1, 1, 1) ;
 
-    GameObj* OBJ_Racetrack = GameObj::Create(); 
-    OBJ_Racetrack->Transform.wPosition = glm::vec3(0, -10, 0);
-    OBJ_Racetrack->Transform.wRotation = glm::vec3(0, 0, 0);
-    OBJ_Racetrack->Transform.wScale = glm::vec3(30.0f, 30.0f, 30.0f) * 2.5f;
+    GameObj* Racetrack_OBJ = GameObj::Create(); 
+    Racetrack_OBJ->Transform.wPosition = glm::vec3(0, -10, 0);
+    Racetrack_OBJ->Transform.wRotation = glm::vec3(0, 0, 0);
+    Racetrack_OBJ->Transform.wScale = glm::vec3(30.0f, 30.0f, 30.0f) * 2.5f;
 
-    Car_Raycast_Init(OBJ_Racetrack, CarOBJ, Model_RacetrackONLY);
+    Car_Raycast_Init(Racetrack_OBJ, CarOBJ, Model_RacetrackONLY);
     FollowCamera_B followCamera(*CarBehav);
 
 
@@ -312,29 +313,34 @@ int main()
         }
 
         mainCamera->Update(deltaTime);
+        
+        if (Input::GetKey(GLFW_KEY_H)) { LightDirection.x += Time.Deltatime; }
+        else if (Input::GetKey(GLFW_KEY_B)) { LightDirection.x -= Time.Deltatime; }
+        if (Input::GetKey(GLFW_KEY_J)) { LightDirection.y += Time.Deltatime; }
+        else if (Input::GetKey(GLFW_KEY_N)) { LightDirection.y -= Time.Deltatime; }
+        if (Input::GetKey(GLFW_KEY_K)) { LightDirection.z += Time.Deltatime; }
+        else if (Input::GetKey(GLFW_KEY_M)) { LightDirection.z -= Time.Deltatime; }
+        //cout << endl << " " << LightDirection.x << " " << LightDirection.y << " " << LightDirection.z;
 
-        glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, -2.0f, 1.0f));
+        glm::vec3 lightDir = glm::normalize(LightDirection);
         // Start Rendering Depth 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
         //glm::vec3 useLightPos = lightPos + CarOBJ->Transform.wPosition;
-        glm::vec3 useLightPos = CarOBJ->Transform.wPosition - lightDir * 10.0f;
 
+
+
+        glm::vec3 useLightPos = CarOBJ->Transform.wPosition - lightDir * 10.0f;
         float near_plane = 1.0f, far_plane = 20.0f;
         lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
         lightView = glm::lookAt(useLightPos, CarOBJ->Transform.wPosition, glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
 
         renderer.RenderDepthMap(lightSpaceMatrix);
-
         renderer.m_depthShader.setVec3("lightPos", useLightPos);
-
-        //glActiveTexture(GL_TEXTURE3);
-        //glBindTexture(GL_TEXTURE_2D, woodTexture);
-        //renderScene(renderer, renderer.m_depthShader);
-        //Model_RacetrackONLY.Draw(renderer.m_depthShader);
-
         CarBehav->Render(renderer.m_depthShader);
+
+
 
         for (auto& obj : objects)
             obj.Render(renderer.m_depthShader);
@@ -376,12 +382,24 @@ int main()
 
         CarBehav->Render(renderer.m_pbrShader);
 
-        renderer.m_pbrShader.setMat4("model", OBJ_Racetrack->Transform.modelMatrix);
-        renderer.m_pbrShader.setMat4("normalMatrix", glm::transpose(glm::inverse(glm::mat3(OBJ_Racetrack->Transform.modelMatrix))));
+        renderer.m_pbrShader.setMat4("model", Racetrack_OBJ->Transform.modelMatrix);
+        renderer.m_pbrShader.setMat4("normalMatrix", glm::transpose(glm::inverse(glm::mat3(Racetrack_OBJ->Transform.modelMatrix))));
         Model_Racetrack.Draw(renderer.m_pbrShader);
 
 
         for (B_CarGhost* Each : B_CarGhostsss) {
+            //GameObj* B_CarGhostOBJ = Each->GameObject;
+            //glm::vec3 useLightPos_A = B_CarGhostOBJ->Transform.wPosition - lightDir * 10.0f;
+            //near_plane = 1.0f; far_plane = 20.0f;
+            //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+            //lightView = glm::lookAt(useLightPos_A, B_CarGhostOBJ->Transform.wPosition, glm::vec3(0.0, 1.0, 0.0));
+            //lightSpaceMatrix = lightProjection * lightView;
+
+            //renderer.RenderDepthMap(lightSpaceMatrix);
+            //renderer.m_depthShader.setVec3("lightPos", useLightPos_A);
+            //CarBehav->Render(renderer.m_depthShader);
+
+            //Each->Render(renderer.m_depthShader);
             Each->Render(renderer.m_pbrShader);
         }
         if (Input::GetKeyDown(GLFW_KEY_C)) {
@@ -390,6 +408,9 @@ int main()
 
         for (auto& obj : objects)
             obj.Render(renderer.m_pbrShader);
+
+
+        renderer.RenderSkybox();
 
         for (unsigned int i = 0; i < lights.size(); ++i)
         {
@@ -407,7 +428,6 @@ int main()
         }
 
 
-        renderer.RenderSkybox();
 
 
 

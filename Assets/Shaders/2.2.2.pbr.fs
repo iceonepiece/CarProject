@@ -110,7 +110,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     vec3 normal = normalize(Normal);
     vec3 lightDir = normalize(lightPos - WorldPos);
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    //bias = 0.0f;
+    bias = 0.0f;
     // check whether current frag pos is in shadow
     // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
     // PCF
@@ -124,7 +124,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
             shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;
         }
     }
-    shadow /= 9.0;
+    shadow *= 0.2;
 
     // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
     if(projCoords.z > 1.0)
@@ -139,12 +139,14 @@ void main()
 
     float metallic = texture(metallicMap, TexCoords).b;
     float roughness = texture(roughnessMap, TexCoords).g;
+    metallic *= 1.5;
+    roughness += 0.1; 
     //metallic = 0.72f;
     //roughness= 0.72f;
     //float ao = texture(aoMap, TexCoords).r;
     //metallic = 0.0;
     //roughness = 1.0;
-    float ao = 1.0;
+    float ao = 0.25;
        
     // input lighting data
     vec3 N = getNormalFromMap();
@@ -232,7 +234,10 @@ void main()
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    color = pow(color, vec3(1.0/2.2));
+
+    color.y *= 1.08; 
+    color.z *= 1.16;
 
     //color = texture(albedoMap, TexCoords).rgb;
 
